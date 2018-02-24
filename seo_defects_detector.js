@@ -66,7 +66,7 @@ function detecting(prefix, text, this_rules, outs) {
 				var match;
 				var match_list = [];
 				while ((match = pattern.exec(text))!=null) {
-						match_list.push(match[0])
+						match_list.push(match[0]);
 								//console.log(match.index)
 				}
 
@@ -83,26 +83,26 @@ function detecting(prefix, text, this_rules, outs) {
 				// Check attribute and value
 				for (i=0 ; i<rule.without_attrs.length; i++){
 						attr_tuple = rule.without_attrs[i];
-						attr = attr_tuple[0]
-								value = attr_tuple[1]
-								if (value != null) {
-										attr_pattern = new RegExp(attr+'\\s*=\\s*\"'+value+'\"');
-										target_string = '\"' + attr + '\" with value \"' + value + '\"';
-								} else {
-										attr_pattern = new RegExp(attr+'\\s*=');
-										target_string = '\"' + attr + '\"';
-								}
+						attr = attr_tuple[0];
+						value = attr_tuple[1];
+						if (value != null) {
+								attr_pattern = new RegExp(attr+'\\s*=\\s*\"'+value+'\"');
+								target_string = '\"' + attr + '\" with value \"' + value + '\"';
+						} else {
+								attr_pattern = new RegExp(attr+'\\s*=');
+								target_string = '\"' + attr + '\"';
+						}
 						// Begin to find
-						var found = false
-								match_list.forEach(function(string){
-										if (attr_pattern.exec(string) == null) {
-												if (rule.any)
-														write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
-																		+ target_string+' not found', outs);
-										} else {
-												found = true
-										}
-								});
+						var found = false;
+						match_list.forEach(function(string){
+								if (attr_pattern.exec(string) == null) {
+										if (rule.any)
+												write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
+																+ target_string+' not found', outs);
+								} else {
+										found = true;
+								}
+						});
 						if (!rule.any && !found)
 								write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
 												+ target_string+' not found', outs);
