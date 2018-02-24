@@ -2,9 +2,9 @@
   "name": "seo_defects_detector",
   "version": "1.0.0",
   "description": "detect SEO defects",
-  "main": "index.js",
+  "main": "seo_defects_detector.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "nodejs test.js"
   },
   "repository": {
     "type": "git",

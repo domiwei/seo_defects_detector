@@ -1,24 +1,38 @@
+const assert = require('assert');
 
 // Rule
 function Rule(tag) {
 	this.tag = tag;
 	this.without_tags = [];
 	this.without_attrs = [];
-	this.num = 1;
+	this.num = null;
+	this.any = false;
 }
 
+// Add tag into list. Check if the tag cannot be
+// found in this tag section.
 Rule.prototype.withoutTag = function(tag) {
+	assert(tag instanceof Rule, 'Object should be instance of Rule');
 	this.without_tags.push(tag);
 	return this;
 };
 
+// Check if any this tag has no given attributes.
+// Default value is false. That is, it passed the rule
+// if there is at least one tag with given attribute.
+Rule.prototype.anyThisTag = function() {
+	this.any = true;
+	return this;
+};
+
+// Attribute list
 Rule.prototype.withoutAttribute = function(attr, value) {
     value = (typeof value !== 'undefined') ? value : null;
 	this.without_attrs.push([attr, value]);
 	return this;
 };
 
-Rule.prototype.amount = function(num) {
+Rule.prototype.amountMoreThan = function(num) {
 	this.num = num;
 	return this;
 };
@@ -42,52 +56,66 @@ function write_result(result, outs) {
         console.log(result);
 }
 
-function detecting(prefix, this_data, this_rules, outs) {
+// Core function. Utilize regular expression to detect:
+// 1. Number of a tag less than expected value.
+// 2. Some attributes are not in a tag.
+// 3. Rules defined in a tag.
+function detecting(prefix, text, this_rules, outs) {
 		this_rules.forEach(function(rule){
 			var pattern = new RegExp('<'+ rule.tag +'[^>]*>', 'g');
 			var match;
 			var match_list = [];
-			while ((match = pattern.exec(this_data))!=null) {
+			while ((match = pattern.exec(text))!=null) {
 				match_list.push(match[0])
-                console.log(match.index)
+                //console.log(match.index)
 			}
 			
             // Check the number of tag
 			if (match_list.length == 0) {
 				write_result(prefix+'Tag <'+rule.tag+'> not found', outs);
                 return;
-			} else if (match_list.length < rule.num) {
-				write_result(prefix+'Tag <'+rule.tag+'> appears '+match_list.length+' times', outs);
+			} else {
+				if (rule.num != null && match_list.length >= rule.num)
+					write_result(prefix+'Tag <'+rule.tag+'> appears '+
+							match_list.length+' times', outs);
 			}
 			
             // Check attribute and value
-			match_list.forEach(function(string){
-				for (i=0 ; i<rule.without_attrs.length; i++){
-					attr_tuple = rule.without_attrs[i];
-                    attr = attr_tuple[0]
-                    value = attr_tuple[1]
-                    if (value != null) {
-					    attr_pattern = new RegExp(attr+'\\s*=\\s*\"'+value+'\"');
-                        target_string = attr + ' with value \"' + value + '\"';
-                    } else {
-					    attr_pattern = new RegExp(attr+'\\s*=');
-                        target_string = attr;
-                    }
+			for (i=0 ; i<rule.without_attrs.length; i++){
+				attr_tuple = rule.without_attrs[i];
+                attr = attr_tuple[0]
+                value = attr_tuple[1]
+                if (value != null) {
+					attr_pattern = new RegExp(attr+'\\s*=\\s*\"'+value+'\"');
+					target_string = '\"' + attr + '\" with value \"' + value + '\"';
+                } else {
+					attr_pattern = new RegExp(attr+'\\s*=');
+                    target_string = '\"' + attr + '\"';
+                }
+				// Begin to find
+				var found = false
+				match_list.forEach(function(string){
 					if (attr_pattern.exec(string) == null) {
-						write_result(prefix+'Attribute '+ target_string+' not found within tag <'
-							    + rule.tag + '>', outs);
+						if (rule.any)
+							write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
+											+ target_string+' not found', outs);
+					} else {
+						found = true
 					}
-				}
-			});
+				});
+				if (!rule.any && !found)
+					write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
+							+ target_string+' not found', outs);
+			}
+
 
             // Check tags in this tag rule.
-            //write_result(rule.without_tags);
             if (rule.without_tags.length == 0)
                 return;
 
             pattern = new RegExp('<'+rule.tag+'[^>]*>([\\s\\S]*)<\/'+rule.tag+'>', 'g');
 			match_list = [];
-			while ((match = pattern.exec(this_data))!=null) {
+			while ((match = pattern.exec(text))!=null) {
 				match_list.push(match[0]);
 			}
             if (match_list.length == 0) {
@@ -103,8 +131,19 @@ function detecting(prefix, this_data, this_rules, outs) {
 		});
 	}
 
-SEODefectsDetector.prototype.addRule = function(rule) {
-	this.rules.push(rule);
+SEODefectsDetector.prototype.addRule = function(new_rule) {
+	assert(new_rule instanceof Rule, 'Object should be instance of Rule');
+	index = this.rules.indexOf(new_rule);
+	if (index >= 0) {
+		this.rules.splice(index, 1);
+	}
+	this.rules.push(new_rule)
+	return this;
+}
+
+SEODefectsDetector.prototype.addRules = function(new_rules) {
+	for (i=0; i<new_rules.length;i++)
+		this.addRule(new_rules[i]);
 	return this;
 }
 
@@ -129,7 +168,6 @@ SEODefectsDetector.prototype.detectByStream = function(rs, outs) {
 	
 	return this;
 }
-
 
 function createSEODefectsDetector() {
 	return new SEODefectsDetector()
