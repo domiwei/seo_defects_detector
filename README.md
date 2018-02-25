@@ -3,6 +3,7 @@ This module is developed and maintained by Kewei Chen.
 
 The goal of this module is to detect user defined SEO defects in a html text.
 Example of how to utilize this module to create rules and detect SEO defects is written in test.js.
+For quick start, run "npm test" to see the result and refer to "test.js" to help coding.
 Following is classes provide in this module.
 
 <h3>Class Rule</h3>

@@ -56,18 +56,28 @@ function write_result(result, outs) {
 		console.log(result);
 }
 
+function lineNumberByIndex(index,string){
+	var line = 0, match, re = /(^)[\S\s]/gm;
+	while (match = re.exec(string)) {
+		if(match.index > index)
+			break;
+		line++;
+	}
+	return line;
+}
+
 // Core function. Utilize regular expression to detect:
 // 1. Number of a tag less than expected value.
 // 2. Some attributes are not in a tag.
 // 3. Rules defined in a tag.
-function detecting(prefix, text, this_rules, outs) {
+function detecting(start_line_num, prefix, text, this_rules, outs) {
 	this_rules.forEach(function(rule){
 		var pattern = new RegExp('<'+ rule.tag +'[^>]*>', 'g');
 		var match;
 		var match_list = [];
 		while ((match = pattern.exec(text))!=null) {
-			match_list.push(match[0]);
-				//console.log(match.index)
+			match_list.push({'string':match[0], 'line':lineNumberByIndex(match.index, text)});
+			//console.log(match.index);
 		}
 
 		// Check the number of tag
@@ -94,18 +104,20 @@ function detecting(prefix, text, this_rules, outs) {
 			}
 			// Begin to find
 			var found = false;
-			match_list.forEach(function(string){
+			match_list.forEach(function(matched_obj){
+				string = matched_obj.string;
+				line = start_line_num + matched_obj.line;
 				if (attr_pattern.exec(string) == null) {
 					if (rule.any)
-						write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
-								+ target_string+' not found', outs);
+						write_result('Line '+ line +': '+ prefix + 'Within tag <' +
+								rule.tag + '>, attribute '+ target_string+' not found', outs);
 				} else {
 					found = true;
 				}
 			});
 			if (!rule.any && !found)
-				write_result(prefix + 'Within tag <' + rule.tag + '>, attribute '
-						+ target_string+' not found', outs);
+				write_result('Line '+ start_line_num + ': ' + prefix + 'Within tag <' +
+						rule.tag + '>, attribute ' + target_string+' not found', outs);
 		}
 
 
@@ -116,15 +128,16 @@ function detecting(prefix, text, this_rules, outs) {
 		pattern = new RegExp('<'+rule.tag+'[^>]*>([\\s\\S]*)<\/'+rule.tag+'>', 'g');
 		match_list = [];
 		while ((match = pattern.exec(text))!=null) {
-			match_list.push(match[0]);
+			match_list.push({'string':match[0], 'line':lineNumberByIndex(match.index, text)});
 		}
 		if (match_list.length == 0) {
 			write_result(prefix+'HTML tag pair <'+rule.tag+'>...</'+rule.tag+'> not found', outs);
 			return;
 		}
 		//write_result(match_list);
-		match_list.forEach(function(matched_string){
-			detecting('In section <'+rule.tag+'> : ', matched_string, rule.without_tags, outs);
+		match_list.forEach(function(matched_obj){
+			detecting(matched_obj.line, 'In section <'+rule.tag+'> : ',
+							matched_obj.string, rule.without_tags, outs);
 		});
 
 		return;
@@ -163,7 +176,7 @@ SEODefectsDetector.prototype.detectByStream = function(rs, outs) {
 			data += chunk.toString();
 	});
 	rs.on('end', function(){
-		detecting('', data, rules, outs);
+		detecting(0, '', data, rules, outs);
 	});
 
 	return this;
