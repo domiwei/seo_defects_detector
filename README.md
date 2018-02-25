@@ -11,8 +11,9 @@ Methods:
 - anyThisTag()
 - withoutTag(tag_rule)
 - amountMoreThan(number_of_the_tag)
-- e.g.
-Create a rule to detect any <img> without alt attribute \n
+
+e.g.
+Create a rule to detect any <img> without alt attribute:
 ` rule = createTagRule('img').anyThisTag().withoutAttribute('alt') `
 
 <h3>SEODefectsDetector</h3>
@@ -20,5 +21,5 @@ Create a rule to detect any <img> without alt attribute \n
 Methods:
 - addRule(rule)
 - addRules(rule_list)
-- detectByFile()
-- detectByStream(file_name)
+- detectByFile(file_name, output_stream)
+- detectByStream(input_stream, outputstream)
