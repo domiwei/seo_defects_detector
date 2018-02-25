@@ -15,10 +15,12 @@ Methods:
 
 e.g.
 
-Create a rule to detect any <img> without alt attribute:
+Create a rule to detect any <img> without alt attribute: 
+
 `rule = createTagRule('img').anyThisTag().withoutAttribute('alt')`
 
-In <head>, check if <meta name='description> cannot be found:
+In <head>, check if <meta name='description> cannot be found: 
+
 `rule = createTagRule('head').withoutTag(createTagRule(meta).withoutAttribute('name', 'description'))`
 
 <h3>SEODefectsDetector</h3>
