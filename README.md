@@ -4,20 +4,24 @@ Example of how to utilize this module to create rules and detect SEO defects is 
 Following is classes provide in this module.
 
 1.
-Rule:
-Used to define a rule with some defects. A rule is defined with a html tag.
+<h3>Rule</h3>
+For a html tag, define a rule with some defects to be detected.
 
-*Methods:
-withoutAttribute(attr_name, attr_value)
-anyThisTag()
-withoutTag(tag_rule)
-amountMoreThan(number_of_the_tag)
+Methods:
+- withoutAttribute(attr_name, attr_value)
+- anyThisTag()
+- withoutTag(tag_rule)
+- amountMoreThan(number_of_the_tag)
+
+e.g.
+Create a rule to detect any <img> without alt attribute
+` rule = createTagRule('img').anyThisTag().withoutAttribute('alt') `
 
 2.
-SEODefectsDetector:
+<h3>SEODefectsDetector</h3>
 
-*Methods
-addRule(rule)
-addRules(rule_list)
-detectByFile()
-detectByStream(file_name)
+Methods:
+- addRule(rule)
+- addRules(rule_list)
+- detectByFile()
+- detectByStream(file_name)
