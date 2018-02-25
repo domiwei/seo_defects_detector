@@ -14,6 +14,7 @@ Methods:
 - amountMoreThan(number_of_the_tag)
 
 e.g.
+
 Create a rule to detect any <img> without alt attribute:
 `rule = createTagRule('img').anyThisTag().withoutAttribute('alt')`
 
