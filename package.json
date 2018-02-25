@@ -1,6 +1,6 @@
 {
   "name": "seo_defects_detector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "detect SEO defects",
   "main": "seo_defects_detector.js",
   "scripts": {
