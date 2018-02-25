@@ -1,5 +1,6 @@
 # seo_defects_detector
 This module is developed and maintained by Kewei Chen.
+
 The goal of this module is to detect user defined SEO defects in a html text.
 Example of how to utilize this module to create rules and detect SEO defects is written in test.js.
 Following is classes provide in this module.
@@ -16,7 +17,7 @@ Methods:
 All the methods above provide fluent interface. That is, the returned value of any these methods
 is the object reference itself. Hence you can chain these methods in a more readable way.
 
-e.g.
+Usage:
 
 Create a rule to detect any <img> without alt attribute: 
 
@@ -36,6 +37,7 @@ Methods:
 
 <h3>Functions</h3>
 In this module, it provides function to create instance of Rule and SEODefectsDetector.
+
 - createTagRule(tag_name)
 - createSEODefectsDetector()
 
