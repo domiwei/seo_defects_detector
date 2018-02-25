@@ -66,7 +66,7 @@ function lineNumberByIndex(index,string){
 	return line;
 }
 
-// Core function. Utilize regular expression to detect:
+// Core function. Takes advantage of regular expression to detect:
 // 1. Number of a tag less than expected value.
 // 2. Some attributes are not in a tag.
 // 3. Rules defined in a tag.
@@ -90,7 +90,8 @@ function detecting(start_line_num, prefix, text, this_rules, outs) {
 						match_list.length+' times', outs);
 		}
 
-		// Check attribute and value
+		// For each attribute, check whether it exists in each matched string.
+		// If any flag is triggered, then detect any tag without the given attrs.
 		for (i=0 ; i<rule.without_attrs.length; i++){
 			attr_tuple = rule.without_attrs[i];
 			attr = attr_tuple[0];
@@ -121,7 +122,8 @@ function detecting(start_line_num, prefix, text, this_rules, outs) {
 		}
 
 
-		// Check tags in this tag rule.
+		// Check tags in this tag rule. Here find the <tag> ... </tag> pair and
+		// recursively check rules defined in Rule.without_tags.
 		if (rule.without_tags.length == 0)
 			return;
 
@@ -134,7 +136,8 @@ function detecting(start_line_num, prefix, text, this_rules, outs) {
 			write_result(prefix+'HTML tag pair <'+rule.tag+'>...</'+rule.tag+'> not found', outs);
 			return;
 		}
-		//write_result(match_list);
+
+		// Run recursion to detect rules in this tag section.
 		match_list.forEach(function(matched_obj){
 			detecting(matched_obj.line, 'In section <'+rule.tag+'> : ',
 							matched_obj.string, rule.without_tags, outs);
@@ -160,6 +163,7 @@ SEODefectsDetector.prototype.addRules = function(new_rules) {
 	return this;
 }
 
+// If the output stream is not defined, result will be written in console.
 var fs = require('fs');
 SEODefectsDetector.prototype.detectByFile = function(path, outs) {
 	var rs = fs.createReadStream(path);
